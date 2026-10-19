@@ -1,0 +1,344 @@
+{
+  "$schema": "./apps.schema.json",
+  "description": "Single source of truth for every winget package published from the rockbenben publisher. The auto-update workflow edits the version/url/sha256/releaseDate/arpDisplayName fields here when an app ships a new release, then regenerates the manifests and opens the pull request against microsoft/winget-pkgs.",
+  "packages": [
+    {
+      "id": "rockbenben.Clockwork",
+      "repo": "rockbenben/Clockwork",
+      "folder": "Clockwork",
+      "version": "3.2.0",
+      "tag": "v3.2.0",
+      "releaseDate": "2026-10-15",
+      "moniker": "clockwork",
+      "name": "Clockwork",
+      "shortDescription": "Windows tray tool: auto-launch apps at login, timed reminders, one-tap routines",
+      "description": [
+        "Clockwork is a Windows tray tool that keeps everything local.",
+        "",
+        "Auto-launch apps at login, set timed reminders, and group actions into one-tap routines.",
+        "Portable: unzip and run, no installer, no service, nothing leaves the machine."
+      ],
+      "tags": [
+        "tray",
+        "automation",
+        "productivity",
+        "launcher",
+        "reminders",
+        "startup"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "zip",
+        "nestedInstallerType": "portable",
+        "relativeFilePath": "Clockwork.exe",
+        "assetName": "Clockwork-v3.2.0-win-x64.zip",
+        "url": "https://github.com/rockbenben/Clockwork/releases/download/v3.2.0/Clockwork-v3.2.0-win-x64.zip",
+        "sha256": "CB0216F8F5CCB03681C4CF3DDAA39BF8ECE16319C9F860CF7B0D5C277297E0CE"
+      },
+      "arp": null,
+      "tagPattern": "v{version}",
+      "assetNamePattern": "Clockwork-v{version}-win-x64.zip"
+    },
+    {
+      "id": "rockbenben.WindowShuttle",
+      "repo": "rockbenben/WindowShuttle",
+      "folder": "WindowShuttle",
+      "version": "1.0.1",
+      "tag": "v1.0.1",
+      "releaseDate": "2026-10-03",
+      "moniker": "windowshuttle",
+      "name": "WindowShuttle",
+      "shortDescription": "Move windows between monitors without dragging - flick one across, or trade two screens whole",
+      "description": [
+        "WindowShuttle moves windows between monitors without dragging them.",
+        "",
+        "Flick a window across to the next screen, or trade the contents of two screens in one move."
+      ],
+      "tags": [
+        "window",
+        "monitor",
+        "productivity",
+        "multi-monitor",
+        "utility"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "zip",
+        "nestedInstallerType": "portable",
+        "relativeFilePath": "WindowShuttle.exe",
+        "assetName": "WindowShuttle-v1.0.1-win-x64.zip",
+        "url": "https://github.com/rockbenben/WindowShuttle/releases/download/v1.0.1/WindowShuttle-v1.0.1-win-x64.zip",
+        "sha256": "13EBE65D8948D75A01AD67252F80141608D0B5DCA36BED5001483E46F1E15C76"
+      },
+      "arp": null,
+      "tagPattern": "v{version}",
+      "assetNamePattern": "WindowShuttle-v{version}-win-x64.zip"
+    },
+    {
+      "id": "rockbenben.RepoRadar",
+      "repo": "rockbenben/repo-radar",
+      "folder": "RepoRadar",
+      "version": "1.4.0",
+      "tag": "v1.4.0",
+      "releaseDate": "2026-09-27",
+      "moniker": "repo-radar",
+      "name": "repo-radar",
+      "shortDescription": "Watches all your Git repos and surfaces the few that need you - local-first, tray-resident",
+      "description": [
+        "repo-radar watches all your Git repositories and surfaces only the few that need attention.",
+        "",
+        "Runs locally in the system tray, with a UI in 18 languages."
+      ],
+      "tags": [
+        "git",
+        "tray",
+        "productivity",
+        "developer-tools",
+        "local-first"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "repo-radar-1.4.0-x64-setup.exe",
+        "url": "https://github.com/rockbenben/repo-radar/releases/download/v1.4.0/repo-radar-1.4.0-x64-setup.exe",
+        "sha256": "93F4B8BEF1CB13CAE9CE7EA4D1A257FA1B39EA58C8A3F33E0141A22044888D74"
+      },
+      "arp": {
+        "productCode": "c22c52bc-3afa-5460-9659-015bb3ff9cae",
+        "displayName": "repo-radar 1.4.0",
+        "publisher": "rockbenben",
+        "displayNamePattern": "repo-radar {version}"
+      },
+      "tagPattern": "v{version}",
+      "assetNamePattern": "repo-radar-{version}-x64-setup.exe"
+    },
+    {
+      "id": "rockbenben.Shuzhai",
+      "repo": "rockbenben/shuzhai",
+      "folder": "Shuzhai",
+      "version": "1.2.1",
+      "tag": "v1.2.1",
+      "releaseDate": "2026-10-19",
+      "moniker": "shuzhai",
+      "name": "Shuzhai",
+      "shortDescription": "Your folder is your bookshelf: covers for txt novels, chapters, and where you left off",
+      "description": [
+        "Shuzhai (书斋) turns a plain folder of txt novels into a readable bookshelf.",
+        "",
+        "It generates covers, splits chapters, remembers where you stopped reading, and lets you rate a book when you finish it."
+      ],
+      "tags": [
+        "ebook",
+        "novel",
+        "reader",
+        "books",
+        "local-first"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "shuzhai-1.2.1-x64-setup.exe",
+        "url": "https://github.com/rockbenben/shuzhai/releases/download/v1.2.1/shuzhai-1.2.1-x64-setup.exe",
+        "sha256": "8CB744E61F1572024BBF4EDE55D2720A751AD1733F98E517B9D05ABF4B6D8F7B"
+      },
+      "arp": {
+        "productCode": "a2a4b670-7368-5d07-92e5-ecaabd05c681",
+        "displayName": "书斋 1.2.1",
+        "publisher": "rockbenben",
+        "displayNamePattern": "书斋 {version}"
+      },
+      "tagPattern": "v{version}",
+      "assetNamePattern": "shuzhai-{version}-x64-setup.exe"
+    },
+    {
+      "id": "rockbenben.RcloneDeck",
+      "repo": "rockbenben/rclone-deck",
+      "folder": "RcloneDeck",
+      "version": "0.1.0",
+      "tag": "v0.1.0",
+      "releaseDate": "2026-10-12",
+      "moniker": "rclone-deck",
+      "name": "rclone-deck",
+      "shortDescription": "Two-way R2 / S3 sync panel that runs only on your own computer",
+      "description": [
+        "rclone-deck is a two-way R2 / S3 sync panel that runs only on your own machine.",
+        "",
+        "There are exactly two places where things can be deleted, and both of them show you what is about to go first."
+      ],
+      "tags": [
+        "sync",
+        "rclone",
+        "s3",
+        "cloud",
+        "local-first"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "rclone-deck_0.1.0_x64-setup.exe",
+        "url": "https://github.com/rockbenben/rclone-deck/releases/download/v0.1.0/rclone-deck_0.1.0_x64-setup.exe",
+        "sha256": "21328156CC390E0C784A483CB74A26D9A8F1B229FB904959430127AADADB7C0C"
+      },
+      "arp": {
+        "productCode": "rclone-deck",
+        "displayName": "rclone-deck",
+        "publisher": "top.aishort.rclone-deck",
+        "displayNamePattern": null
+      },
+      "tagPattern": "v{version}",
+      "assetNamePattern": "rclone-deck_{version}_x64-setup.exe"
+    },
+    {
+      "id": "rockbenben.SubtitleTranslator",
+      "repo": "rockbenben/subtitle-translator",
+      "folder": "SubtitleTranslator",
+      "version": "3.2.1",
+      "tag": "v3.2.1",
+      "releaseDate": "2026-09-17",
+      "moniker": "subtitle-translator",
+      "name": "SubtitleTranslator",
+      "shortDescription": "Translate a whole season of subtitles in one pass - timing untouched",
+      "description": [
+        "SubtitleTranslator translates a whole season of subtitles in one pass.",
+        "",
+        "Supports .srt, .ass, .vtt and .lrc, 120+ languages and 27 LLM providers, and never touches the timing."
+      ],
+      "tags": [
+        "subtitles",
+        "translation",
+        "srt",
+        "llm",
+        "media"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "SubtitleTranslator_3.2.1_x64_setup.exe",
+        "url": "https://github.com/rockbenben/subtitle-translator/releases/download/v3.2.1/SubtitleTranslator_3.2.1_x64_setup.exe",
+        "sha256": "C495C682ABE1D6C9F09AC391833BEF576727C436DC9D32802FCD037293D1F518"
+      },
+      "arp": {
+        "productCode": "Subtitle Translator",
+        "displayName": "Subtitle Translator",
+        "publisher": "rockbenben",
+        "displayNamePattern": null
+      },
+      "tagPattern": "v{version}",
+      "assetNamePattern": "SubtitleTranslator_{version}_x64_setup.exe"
+    },
+    {
+      "id": "rockbenben.ImgPrompt",
+      "repo": "rockbenben/img-prompt",
+      "folder": "ImgPrompt",
+      "version": "3.1.0",
+      "tag": "app-v3.1.0",
+      "releaseDate": "2026-09-27",
+      "moniker": "img-prompt",
+      "name": "img-prompt",
+      "shortDescription": "Click tags in your language, get the English prompt AI image models expect",
+      "description": [
+        "img-prompt turns a set of tags in your own language into the English prompt that image models actually expect.",
+        "",
+        "Works with Midjourney, FLUX, GPT-Image and Veo."
+      ],
+      "tags": [
+        "prompt",
+        "ai",
+        "image",
+        "midjourney",
+        "flux"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "img-prompt_3.1.0_x64-setup.exe",
+        "url": "https://github.com/rockbenben/img-prompt/releases/download/app-v3.1.0/img-prompt_3.1.0_x64-setup.exe",
+        "sha256": "1B4672284963E9D1C5CD4992FAEE1402C84202D32A779FBF9CC34E75B3785124"
+      },
+      "arp": {
+        "productCode": "img-prompt",
+        "displayName": "img-prompt",
+        "publisher": "img-prompt",
+        "displayNamePattern": null
+      },
+      "tagPattern": "app-v{version}",
+      "assetNamePattern": "img-prompt_{version}_x64-setup.exe"
+    },
+    {
+      "id": "rockbenben.TextDiff",
+      "repo": "rockbenben/text-diff",
+      "folder": "TextDiff",
+      "version": "3.0.1",
+      "tag": "v3.0.1",
+      "releaseDate": "2026-06-18",
+      "moniker": "text-diff",
+      "name": "Text.Diff",
+      "shortDescription": "Offline two-pane text and file diff that highlights every change, all in-browser",
+      "description": [
+        "Text.Diff is an offline two-pane text and file diff tool.",
+        "",
+        "It highlights every change, pinpoints the first difference, and runs entirely in the browser."
+      ],
+      "tags": [
+        "diff",
+        "compare",
+        "text",
+        "developer-tools",
+        "local-first"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "Text.Diff_3.0.1_x64-setup.exe",
+        "url": "https://github.com/rockbenben/text-diff/releases/download/v3.0.1/Text.Diff_3.0.1_x64-setup.exe",
+        "sha256": "B552C012A18584FF80D5BEA86F2C06B12BDCE73CA03AB5152991323FC9322D68"
+      },
+      "arp": {
+        "productCode": "Text Diff",
+        "displayName": "Text Diff",
+        "publisher": "rockbenben",
+        "displayNamePattern": null
+      },
+      "tagPattern": "v{version}",
+      "assetNamePattern": "Text.Diff_{version}_x64-setup.exe"
+    },
+    {
+      "id": "rockbenben.MdPublisher",
+      "repo": "rockbenben/md-publisher",
+      "folder": "MdPublisher",
+      "version": "0.4.0",
+      "tag": "v0.4.0",
+      "releaseDate": "2026-10-19",
+      "moniker": "md-publisher",
+      "name": "md-publisher",
+      "shortDescription": "Write Markdown once, publish in bulk to 少数派 / 知乎 / 公众号 / 什么值得买 / 掘金 / X",
+      "description": [
+        "md-publisher lets you write Markdown once and publish it in bulk to 少数派, 知乎, 公众号, 什么值得买, 掘金 and X.",
+        "",
+        "It fills in the title and body for you; the final publish click is always yours."
+      ],
+      "tags": [
+        "markdown",
+        "publishing",
+        "blogging",
+        "content",
+        "automation"
+      ],
+      "minimumOSVersion": "10.0.0.0",
+      "installer": {
+        "type": "nullsoft",
+        "assetName": "md-publisher-Setup-0.4.0.exe",
+        "url": "https://github.com/rockbenben/md-publisher/releases/download/v0.4.0/md-publisher-Setup-0.4.0.exe",
+        "sha256": "C960A22A54E347AECC520A5B0BF2365B8CE6E9AFEE73980BD583E9B4A2025298"
+      },
+      "arp": {
+        "productCode": "fc0c7050-e4ae-56dc-8d5f-2589577363f8",
+        "displayName": "md-publisher 0.4.0",
+        "publisher": "rockbenben",
+        "displayNamePattern": "md-publisher {version}"
+      },
+      "tagPattern": "v{version}",
+      "assetNamePattern": "md-publisher-Setup-{version}.exe"
+    }
+  ]
+}

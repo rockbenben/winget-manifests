@@ -52,6 +52,15 @@ jobs:
             'hasUpdates=true' | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           }
 
+      - name: Check that the submit token is available
+        if: steps.detect.outputs.hasUpdates == 'true'
+        shell: pwsh
+        run: |
+          if (-not $env:WINGET_TOKEN) {
+            Write-Error 'WINGET_TOKEN is not set. Add a GitHub personal access token (classic) with the public_repo scope as a repository secret named WINGET_TOKEN.'
+            exit 1
+          }
+
       - name: Regenerate the manifests
         if: steps.detect.outputs.hasUpdates == 'true'
         shell: pwsh

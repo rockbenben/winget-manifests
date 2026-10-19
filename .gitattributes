@@ -1,0 +1,10 @@
+# The manifests are pushed to microsoft/winget-pkgs as they are, so the line endings have to
+# stay LF. Without this, a Windows checkout would rewrite them to CRLF and the generated files
+# would no longer match the ones that were validated and published.
+* text=auto eol=lf
+
+*.ps1 text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.md   text eol=lf

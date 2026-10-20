@@ -52,14 +52,34 @@ jobs:
             'hasUpdates=true' | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           }
 
-      - name: Check that the submit token is available
-        if: steps.detect.outputs.hasUpdates == 'true'
+      - name: Check that the submit token works
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           if (-not $env:WINGET_TOKEN) {
             Write-Error 'WINGET_TOKEN is not set. Add a GitHub personal access token (classic) with the public_repo scope as a repository secret named WINGET_TOKEN.'
             exit 1
           }
+          # The token is only used when there is something to publish, so a bad token would
+          # otherwise stay invisible until the next release. Prove it works on every run
+          # instead, and say exactly what is wrong when it does not.
+          $env:GH_TOKEN = $env:WINGET_TOKEN
+          $login = gh api user --jq .login
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error 'WINGET_TOKEN did not authenticate with GitHub. It is most likely expired or was copied with stray whitespace.'
+            exit 1
+          }
+          Write-Host "submit token authenticates as $login"
+          $push = gh api repos/rockbenben/winget-pkgs --jq '.permissions.push'
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error 'WINGET_TOKEN could not read rockbenben/winget-pkgs.'
+            exit 1
+          }
+          if ($push -ne 'true') {
+            Write-Error "WINGET_TOKEN has no push access to rockbenben/winget-pkgs (permissions.push=$push). A classic token needs the public_repo scope."
+            exit 1
+          }
+          Write-Host 'submit token can push to rockbenben/winget-pkgs'
 
       - name: Regenerate the manifests
         if: steps.detect.outputs.hasUpdates == 'true'

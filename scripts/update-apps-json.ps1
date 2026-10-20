@@ -1,17 +1,27 @@
 param(
   [string]$ConfigPath,
   [string]$PendingFile,
-  [string]$Filter = ''
+  [string]$Filter = '',
+  [string]$Upstream = 'microsoft/winget-pkgs'
 )
 
-# Looks at the latest GitHub release of every app listed in apps.json and, when that release is
-# newer than the version we already publish, rewrites apps.json with the new version, installer
-# url, sha256, release date and ARP display name. Writes the list of changed packages to
-# pending.json so the submit script knows what to publish.
+# Works out which version of every package belongs in winget next and rewrites apps.json with
+# that version's installer details.
 #
-# The sha256 comes from the release asset's own "digest" field (GitHub publishes sha256 there), so
-# nothing large is downloaded. The fallback path downloads the asset and hashes it locally, for
-# releases whose assets were uploaded before GitHub started filling in digests.
+# The published state is read from microsoft/winget-pkgs itself, not from this repository: a
+# version only counts as published once its manifests are in the upstream repository. That is
+# also what tells a first submission apart from a version bump:
+#
+#   - the package has no manifests upstream yet -> a new package
+#   - the package already has manifests upstream -> an update of it
+#
+# The version moves on one step at a time. The next version is only picked once the current one
+# is in the upstream repository, so a package never has two pull requests in review at the same
+# time and an older version can never overtake a newer one.
+#
+# The sha256 comes from the release asset's own "digest" field (GitHub publishes sha256 there),
+# so nothing large is downloaded. The fallback path downloads the asset and hashes it locally,
+# for releases whose assets were uploaded before GitHub started filling in digests.
 
 $ErrorActionPreference = 'Stop'
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -31,24 +41,80 @@ $headers = @{
 }
 if ($env:GITHUB_TOKEN) { $headers['Authorization'] = "Bearer $env:GITHUB_TOKEN" }
 
-function Get-Release($repo) {
-  $uri = "https://api.github.com/repos/$repo/releases/latest"
+function Invoke-GitHubApi([string]$Uri) {
   for ($i = 1; $i -le 4; $i++) {
     try {
-      return Invoke-RestMethod -Uri $uri -Headers $headers -TimeoutSec 60
+      return Invoke-RestMethod -Uri $Uri -Headers $headers -TimeoutSec 60
     } catch {
+      $code = 0
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) { $code = [int]$_.Exception.Response.StatusCode }
+      # A request that is answered with a client error will not get better by asking again.
+      if ($code -ge 400 -and $code -lt 500) { throw }
       if ($i -eq 4) { throw }
       Start-Sleep -Seconds (3 * $i)
     }
   }
 }
 
-function Test-Newer([string]$candidate, [string]$current) {
-  $c = $null; $k = $null
-  if ([version]::TryParse($candidate, [ref]$c) -and [version]::TryParse($current, [ref]$k)) {
-    return $c -gt $k
+# Every release of the app, drafts and pre-releases left out. The list is needed because the
+# next version to publish is the one after the published one, not simply the newest release.
+function Get-Releases($repo) {
+  $all = Invoke-GitHubApi "https://api.github.com/repos/$repo/releases?per_page=100"
+  return @($all | Where-Object { -not $_.draft -and -not $_.prerelease })
+}
+
+# The versions of the package that are already in microsoft/winget-pkgs. An empty result means
+# the package does not exist upstream yet.
+function Get-PublishedVersions([string]$folder) {
+  $uri = "https://api.github.com/repos/$Upstream/contents/manifests/r/rockbenben/$folder"
+  try {
+    $items = Invoke-GitHubApi $uri
+    return @($items | Where-Object { $_.type -eq 'dir' } | ForEach-Object { $_.name })
+  } catch {
+    $code = 0
+    if ($_.Exception.Response -and $_.Exception.Response.StatusCode) { $code = [int]$_.Exception.Response.StatusCode }
+    if ($code -eq 404) { return @() }
+    throw
   }
-  return $candidate -ne $current -and $candidate.CompareTo($current) -gt 0
+}
+
+function Compare-Version([string]$a, [string]$b) {
+  $va = $null; $vb = $null
+  if ([version]::TryParse($a, [ref]$va) -and [version]::TryParse($b, [ref]$vb)) {
+    return [math]::Sign($va.CompareTo($vb))
+  }
+  return [math]::Sign($a.CompareTo($b))
+}
+
+# The version that should be in winget next.
+#   $current   - the version this repository is working on
+#   $published - the versions already in the upstream repository
+#   $releases  - every release version the app has, lowest first
+function Select-TargetVersion([string]$current, [string[]]$published, [string[]]$releases) {
+  if ($releases.Count -eq 0) { return $null }
+
+  if ($published.Count -eq 0) {
+    # The package is not in winget yet, so the version this repository already knows about is
+    # the one that establishes the package.
+    if ($releases -contains $current) { return $current }
+    return $releases[0]
+  }
+
+  $maxPublished = $published | Sort-Object -Property @{ Expression = {
+      try { [version]$_ } catch { [version]'0.0' } } } -Descending | Select-Object -First 1
+
+  if ($published -contains $current) {
+    # The current version is published, move on to the next release.
+    return ($releases | Where-Object { (Compare-Version $_ $current) -gt 0 } | Select-Object -First 1)
+  }
+
+  if ((Compare-Version $current $maxPublished) -gt 0) {
+    # The version was already moved on to, it is just not merged into winget yet.
+    return $current
+  }
+
+  # The upstream repository is ahead of this repository, catch up with it.
+  return ($releases | Where-Object { (Compare-Version $_ $maxPublished) -gt 0 } | Select-Object -First 1)
 }
 
 function Get-AssetSha256($asset) {
@@ -70,56 +136,78 @@ foreach ($p in $cfg.packages) {
   Write-Host "checking $($p.id) (published $($p.version))"
 
   try {
-    $rel = Get-Release $p.repo
+    $rels = Get-Releases $p.repo
   } catch {
-    Write-Host "  could not read the latest release: $($_.Exception.Message)"
+    Write-Host "  could not read the releases: $($_.Exception.Message)"
     continue
   }
-  if ($rel.draft) { Write-Host '  latest release is a draft, skipping'; continue }
 
+  # The version of every release that matches the expected tag shape.
   $prefix = ($p.tagPattern -replace '\{version\}', '')
-  $tag = $rel.tag_name
-  if (-not $tag.StartsWith($prefix)) {
-    Write-Host "  tag '$tag' does not match the expected pattern '$($p.tagPattern)', skipping"
+  $candidates = @()
+  foreach ($rel in $rels) {
+    if (-not $rel.tag_name.StartsWith($prefix)) { continue }
+    $v = $rel.tag_name.Substring($prefix.Length)
+    if (-not $v) { continue }
+    $candidates += [pscustomobject]@{ version = $v; tag = $rel.tag_name; release = $rel }
+  }
+  $candidates = @($candidates | Sort-Object -Property @{ Expression = {
+      try { [version]$_.version } catch { [version]'0.0' } } })
+  $releaseVersions = @($candidates | ForEach-Object { $_.version })
+
+  try {
+    $published = Get-PublishedVersions $p.folder
+  } catch {
+    Write-Host "  could not read the published versions from $Upstream : $($_.Exception.Message)"
     continue
   }
-  $version = $tag.Substring($prefix.Length)
-  if (-not $version) { Write-Host '  could not derive a version from the tag, skipping'; continue }
+  if ($published.Count -gt 0) { Write-Host "  in winget already: $($published -join ', ')" }
 
-  if (-not (Test-Newer $version $p.version)) {
-    Write-Host "  published version $($p.version) is already current"
+  $target = Select-TargetVersion $p.version $published $releaseVersions
+  if (-not $target) {
+    Write-Host "  nothing to publish"
     continue
   }
 
-  $assetName = ($p.assetNamePattern -replace '\{version\}', $version)
+  $entry = $candidates | Where-Object { $_.version -eq $target } | Select-Object -First 1
+  if (-not $entry) {
+    Write-Host "  release $target is not one of the app's releases, skipping"
+    continue
+  }
+  $rel = $entry.release
+
+  $assetName = ($p.assetNamePattern -replace '\{version\}', $target)
   $asset = @($rel.assets) | Where-Object { $_.name -eq $assetName } | Select-Object -First 1
   if (-not $asset) {
-    Write-Host "  release $tag has no asset named '$assetName' (assets: $((@($rel.assets) | ForEach-Object { $_.name }) -join ', ')), skipping"
+    Write-Host "  release $($entry.tag) has no asset named '$assetName' (assets: $((@($rel.assets) | ForEach-Object { $_.name }) -join ', ')), skipping"
     continue
   }
 
   $sha = Get-AssetSha256 $asset
   $releaseDate = ([datetime]$rel.published_at).ToString('yyyy-MM-dd')
 
-  $p.version = $version
-  $p.tag = $tag
+  $p.version = $target
+  $p.tag = $entry.tag
   $p.releaseDate = $releaseDate
   $p.installer.assetName = $assetName
   $p.installer.url = $asset.browser_download_url
   $p.installer.sha256 = $sha
   if ($p.arp -and $p.arp.displayNamePattern) {
-    $p.arp.displayName = ($p.arp.displayNamePattern -replace '\{version\}', $version)
+    $p.arp.displayName = ($p.arp.displayNamePattern -replace '\{version\}', $target)
   }
 
-  Write-Host "  new version $version -> $assetName"
+  Write-Host "  publishing $target -> $assetName"
   $pending += [pscustomobject]@{
-    id = $p.id; folder = $p.folder; version = $version; repo = $p.repo
-    isNew = -not (Test-Path "manifests\r\rockbenben\$($p.folder)")
+    id = $p.id; folder = $p.folder; version = $target; tag = $entry.tag; repo = $p.repo
   }
 }
 
-[System.IO.File]::WriteAllText($ConfigPath, ($cfg | ConvertTo-Json -Depth 12), $utf8NoBom)
-[System.IO.File]::WriteAllText($PendingFile, ($pending | ConvertTo-Json -Depth 6), $utf8NoBom)
+# The generated files are checked out with LF line endings, so they are written that way too
+# and a run on Windows does not leave the working tree with different line endings.
+$json = ($cfg | ConvertTo-Json -Depth 12) -replace "`r`n", "`n"
+[System.IO.File]::WriteAllText($ConfigPath, $json, $utf8NoBom)
+$pendingJson = ($pending | ConvertTo-Json -Depth 6) -replace "`r`n", "`n"
+[System.IO.File]::WriteAllText($PendingFile, $pendingJson, $utf8NoBom)
 
 Write-Host ''
 if ($pending.Count -eq 0) {
@@ -128,3 +216,4 @@ if ($pending.Count -eq 0) {
 }
 Write-Host "$($pending.Count) package(s) need a manifest update:"
 $pending | ForEach-Object { Write-Host "  $($_.id) -> $($_.version)" }
+exit 0

@@ -14,10 +14,27 @@ Every package in winget needs a manifest whose `PackageVersion` matches the app 
 the part that quietly stops happening: the manifest then trails the app by however long it takes
 someone to remember.
 
-This repository closes that gap. A scheduled workflow checks each app's latest GitHub release, and
-when it is newer than the published version it rewrites `apps.json`, regenerates the manifests and
-opens a pull request against `microsoft/winget-pkgs` - the same three files per package that the
-upstream repository expects.
+This repository closes that gap. A scheduled workflow checks each app's releases and, when the
+version that winget should have is not in `microsoft/winget-pkgs` yet, it rewrites `apps.json`,
+regenerates the manifests and opens a pull request against `microsoft/winget-pkgs` - the same
+three files per package that the upstream repository expects.
+
+## The order of things
+
+The published state is read from `microsoft/winget-pkgs` itself, never from this repository.
+That is what tells a first submission apart from a version bump:
+
+| State in `microsoft/winget-pkgs` | Pull request |
+|---|---|
+| the package has no manifests yet | `New package: <id> version <version>` |
+| the package already has manifests | `Update: <id> to <version>` |
+
+The version moves on one step at a time. The next version is only picked once the current one
+is in the upstream repository, so a package never has two pull requests in review at the same
+time and an older version can never overtake a newer one. A version that already has an open
+pull request is left alone, and a version whose pull request was closed is only submitted again
+when the package turned up in winget after that pull request was closed - a rejected pull
+request is not opened again every six hours.
 
 ## Layout
 
@@ -27,14 +44,16 @@ manifests/r/rockbenben/<App>/<version>/
                                the generated manifests, laid out exactly as they land in
                                microsoft/winget-pkgs
 scripts/generate-manifests.ps1  reads apps.json and writes the manifests
-scripts/update-apps-json.ps1   finds new app releases and rewrites apps.json
+scripts/update-apps-json.ps1   finds the version to publish and rewrites apps.json
 scripts/submit-manifest-pr.ps1  pushes the manifests to the fork and opens the pull requests
 .github/workflows/winget-auto-update.yml
                                the scheduled job that ties the three together
 ```
 
 `apps.json` is the only file that should ever be edited by hand. The yaml files are generated -
-change the config, not the output.
+change the config, not the output. The generated tree holds one version per package: the version
+that is being published. Earlier versions stay in `microsoft/winget-pkgs`, they are not part of
+what this repository generates.
 
 ## One package entry
 

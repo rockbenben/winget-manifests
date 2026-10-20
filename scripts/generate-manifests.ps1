@@ -27,8 +27,21 @@ function Quote([string]$s) {
 }
 
 foreach ($p in $cfg.packages) {
-  $dir = Join-Path (Join-Path $OutRoot $p.folder) $p.version
+  $pkgDir = Join-Path $OutRoot $p.folder
+  $dir = Join-Path $pkgDir $p.version
   New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+  # One version per package in this repository: the version that is being published. The
+  # manifests of the versions that came before it stay in microsoft/winget-pkgs, they are not
+  # part of what this repository generates.
+  if (Test-Path -LiteralPath $pkgDir) {
+    foreach ($stale in Get-ChildItem -LiteralPath $pkgDir -Directory) {
+      if ($stale.Name -eq $p.version) { continue }
+      Get-ChildItem -LiteralPath $stale.FullName -File | ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force }
+      Remove-Item -LiteralPath $stale.FullName -Force
+      Write-Output "removed the manifests of $($p.id) $($stale.Name)"
+    }
+  }
 
   $repoName = ($p.repo -split '/')[1]
 

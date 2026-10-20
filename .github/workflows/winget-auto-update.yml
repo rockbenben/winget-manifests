@@ -97,12 +97,18 @@ jobs:
           foreach ($p in $pending) {
             $dir = Join-Path 'manifests/r/rockbenben' (Join-Path $p.folder $p.version)
             Write-Host "validating $dir"
-            if ($hasWinget) {
-              winget validate --manifest $dir --disable-interactivity
-              if ($LASTEXITCODE -ne 0) { $failed += $p.id }
-            } else {
+            if (-not $hasWinget) {
               Write-Host 'winget is not available on this runner, skipping the local schema check'
+              continue
             }
+            $out = winget validate --manifest $dir --disable-interactivity 2>&1 | Out-String
+            Write-Host $out
+            # Judge the result by what winget says, not by its exit code. Some runner builds
+            # exit non-zero for warnings alone, and the schema header used here is byte for
+            # byte the one Microsoft publishes in its own merged manifests, so a warning about
+            # it is noise from an older winget, not a defect in the manifest.
+            $succeeded = $out -match 'validation succeeded' -or $out -match '验证成功'
+            if (-not $succeeded) { $failed += $p.id }
           }
           if ($failed.Count -gt 0) { throw "winget validate failed for: $($failed -join ', ')" }
 

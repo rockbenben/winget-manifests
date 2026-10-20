@@ -6,9 +6,9 @@
       "id": "rockbenben.Clockwork",
       "repo": "rockbenben/Clockwork",
       "folder": "Clockwork",
-      "version": "3.2.0",
-      "tag": "v3.2.0",
-      "releaseDate": "2026-10-15",
+      "version": "3.2.1",
+      "tag": "v3.2.1",
+      "releaseDate": "2026-10-20",
       "moniker": "clockwork",
       "name": "Clockwork",
       "shortDescription": "Windows tray tool: auto-launch apps at login, timed reminders, one-tap routines",
@@ -31,9 +31,9 @@
         "type": "zip",
         "nestedInstallerType": "portable",
         "relativeFilePath": "Clockwork.exe",
-        "assetName": "Clockwork-v3.2.0-win-x64.zip",
-        "url": "https://github.com/rockbenben/Clockwork/releases/download/v3.2.0/Clockwork-v3.2.0-win-x64.zip",
-        "sha256": "CB0216F8F5CCB03681C4CF3DDAA39BF8ECE16319C9F860CF7B0D5C277297E0CE"
+        "assetName": "Clockwork-v3.2.1-win-x64.zip",
+        "url": "https://github.com/rockbenben/Clockwork/releases/download/v3.2.1/Clockwork-v3.2.1-win-x64.zip",
+        "sha256": "89CF1130728C7899575BDD574BCC003DD04F18F3B5EBC416379707EEA717C22B"
       },
       "arp": null,
       "tagPattern": "v{version}",
@@ -154,9 +154,9 @@
       "id": "rockbenben.RcloneDeck",
       "repo": "rockbenben/rclone-deck",
       "folder": "RcloneDeck",
-      "version": "0.1.0",
-      "tag": "v0.1.0",
-      "releaseDate": "2026-10-12",
+      "version": "0.1.1",
+      "tag": "v0.1.1",
+      "releaseDate": "2026-10-20",
       "moniker": "rclone-deck",
       "name": "rclone-deck",
       "shortDescription": "Two-way R2 / S3 sync panel that runs only on your own computer",
@@ -175,9 +175,9 @@
       "minimumOSVersion": "10.0.0.0",
       "installer": {
         "type": "nullsoft",
-        "assetName": "rclone-deck_0.1.0_x64-setup.exe",
-        "url": "https://github.com/rockbenben/rclone-deck/releases/download/v0.1.0/rclone-deck_0.1.0_x64-setup.exe",
-        "sha256": "21328156CC390E0C784A483CB74A26D9A8F1B229FB904959430127AADADB7C0C"
+        "assetName": "rclone-deck_0.1.1_x64-setup.exe",
+        "url": "https://github.com/rockbenben/rclone-deck/releases/download/v0.1.1/rclone-deck_0.1.1_x64-setup.exe",
+        "sha256": "C61F2B1249994E0DAFB1ADCB438D75D68335ACF26159430551F2EBA988291387"
       },
       "arp": {
         "productCode": "rclone-deck",

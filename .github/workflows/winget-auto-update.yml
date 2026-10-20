@@ -127,6 +127,11 @@ jobs:
           # explicitly instead of letting that value decide.
           exit 0
 
+      - name: Open the pull requests against winget-pkgs
+        if: steps.detect.outputs.hasUpdates == 'true'
+        shell: pwsh
+        run: ./scripts/submit-manifest-pr.ps1
+
       - name: Commit the regenerated manifests
         if: steps.detect.outputs.hasUpdates == 'true'
         shell: pwsh
@@ -143,8 +148,3 @@ jobs:
             Write-Host 'nothing changed, nothing to commit'
           }
           exit 0
-
-      - name: Open the pull requests against winget-pkgs
-        if: steps.detect.outputs.hasUpdates == 'true'
-        shell: pwsh
-        run: ./scripts/submit-manifest-pr.ps1

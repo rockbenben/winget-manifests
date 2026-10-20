@@ -109,6 +109,7 @@ jobs:
             $out = & winget validate --manifest $dir --disable-interactivity 2>&1 | Out-String
             $code = $LASTEXITCODE
             $ErrorActionPreference = 'Stop'
+            $global:LASTEXITCODE = 0
             Write-Host $out
             Write-Host "winget exit code: $code"
             # The schema header used here is byte for byte the one Microsoft publishes in its
@@ -118,6 +119,10 @@ jobs:
             if (-not $succeeded) { $failed += $p.id }
           }
           if ($failed.Count -gt 0) { throw "winget validate failed for: $($failed -join ', ')" }
+          # The runner's pwsh shell turns the script's exit code into the step's exit code and
+          # a native command that failed leaves LASTEXITCODE behind, so state the result
+          # explicitly instead of letting that value decide.
+          exit 0
 
       - name: Commit the regenerated manifests
         if: steps.detect.outputs.hasUpdates == 'true'

@@ -95,7 +95,7 @@ Generated automatically by the winget manifest auto-update workflow from apps.js
 - [x] Manifest conforms to the [1.12 schema](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.12.0)
 "@
 
-  $prArgs = @('--method', 'POST', "repos/$Upstream/pulls", '-f', "title=$title",
+  $prArgs = @('api', '--method', 'POST', "repos/$Upstream/pulls", '-f', "title=$title",
               '-f', "head=rockbenben:$branch", '-f', 'base=master', '-f', "body=$body")
   $pr = Invoke-Gh $prArgs | ConvertFrom-Json
   Write-Host "  PR: $($pr.html_url)"

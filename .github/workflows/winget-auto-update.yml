@@ -14,7 +14,10 @@ on:
     types: [app-released]
 
 permissions:
-  contents: read
+  # write on this repository only: the workflow commits the refreshed apps.json and manifests
+  # back here so the next run knows which versions have already been published. The pull
+  # requests against winget-pkgs are opened with WINGET_TOKEN, not with this token.
+  contents: write
 
 concurrency:
   group: winget-manifest-auto-update
@@ -131,7 +134,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps.json manifests pending.json
+          git add apps.json manifests
           git diff --cached --quiet
           if ($LASTEXITCODE -ne 0) {
             git commit -m 'chore: refresh winget manifests for new app releases'
@@ -139,6 +142,7 @@ jobs:
           } else {
             Write-Host 'nothing changed, nothing to commit'
           }
+          exit 0
 
       - name: Open the pull requests against winget-pkgs
         if: steps.detect.outputs.hasUpdates == 'true'
